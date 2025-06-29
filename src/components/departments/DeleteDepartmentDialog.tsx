@@ -48,7 +48,7 @@ export default function DeleteDepartmentDialog({ departmentId, departmentName }:
           <DialogTitle>Você tem certeza absoluta?</DialogTitle>
           <DialogDescription>
             Essa ação não pode ser desfeita. Isso irá excluir permanentemente o departamento 
-            <strong> "{departmentName}"</strong>.
+            <strong>“{departmentName}”</strong>.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
