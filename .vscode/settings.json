@@ -1,0 +1,9 @@
+{
+  "deno.enable": true,
+  "deno.lint": true,
+  // A linha "deno.unstable" foi removida, pois não é mais necessária
+  // para as funcionalidades básicas que estamos usando.
+  "deno.enablePaths": [
+    "supabase/functions"
+  ]
+}
