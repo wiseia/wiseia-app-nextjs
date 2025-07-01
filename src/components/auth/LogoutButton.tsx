@@ -12,7 +12,7 @@ export default function LogoutButton() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.refresh()
-    router.push('/') // Redireciona para a página de login
+    router.push('/login') // Redireciona para a página de login
   }
 
   return (
