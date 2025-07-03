@@ -1,18 +1,17 @@
-// src/app/auth/callback/route.ts
-
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
 
   if (code) {
+    // Apenas tenta trocar o código. O middleware fará o resto.
     const supabase = createClient()
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // Após a troca, redireciona para o dashboard. O middleware cuidará da sessão.
-  return NextResponse.redirect(new URL('/dashboard', request.url))
+  // Redireciona de volta para a página de onde o processo começou.
+  return NextResponse.redirect(`${origin}/dashboard/drivers`)
 }
