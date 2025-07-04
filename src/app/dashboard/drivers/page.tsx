@@ -1,40 +1,44 @@
-import { getGoogleAuthUrl } from './actions';
+// Este será um componente cliente para interatividade
+'use client'; 
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 export default function DriversPage() {
+
+  const handleSaveGoogleCredentials = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // A lógica para salvar as credenciais no Supabase Vault virá aqui
+    // Por enquanto, vamos apenas mostrar uma mensagem de sucesso.
+    toast.success("Credenciais salvas com sucesso! (Funcionalidade em desenvolvimento)");
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Conectar Fontes de Documentos</h1>
       
-      <div className="bg-white p-6 rounded-lg shadow">
+      <form onSubmit={handleSaveGoogleCredentials} className="bg-white p-6 rounded-lg shadow space-y-4">
         <h2 className="text-xl font-semibold">Google Drive</h2>
-        <p className="text-muted-foreground mt-2 mb-4">
-          Conecte sua conta do Google Drive para permitir que o WISEIA leia
-          e analise seus documentos de forma segura.
+        <p className="text-muted-foreground pb-4">
+          Para conectar, siga nosso tutorial para criar uma <strong>Conta de Serviço</strong> no Google Cloud, 
+          gere um arquivo de chave JSON e cole o conteúdo aqui.
         </p>
         
-        {/* O formulário chama a nossa Server Action */}
-        <form action={getGoogleAuthUrl}>
-          <button 
-            type="submit" 
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Conectar com Google Drive
-          </button>
-        </form>
-      </div>
+        <div className='space-y-1'>
+          <Label htmlFor="google-credentials">Conteúdo do Arquivo de Chave JSON</Label>
+          <textarea
+            id="google-credentials"
+            placeholder='Cole o conteúdo do seu arquivo JSON aqui... Ex: { "type": "service_account", ... }'
+            className="w-full h-40 p-2 border rounded-md"
+          />
+        </div>
 
-      <div className="bg-white p-6 rounded-lg shadow mt-6">
-        <h2 className="text-xl font-semibold">Microsoft OneDrive</h2>
-        <p className="text-muted-foreground mt-2 mb-4">
-          (Integração com OneDrive em breve)
-        </p>
-        <button 
-          disabled 
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-secondary text-secondary-foreground opacity-50 cursor-not-allowed"
-        >
-          Conectar com OneDrive
-        </button>
-      </div>
+        <Button type="submit">
+          Salvar Credenciais do Google
+        </Button>
+      </form>
     </div>
   );
 }
