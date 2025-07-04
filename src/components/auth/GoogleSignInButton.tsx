@@ -10,6 +10,12 @@ export default function GoogleSignInButton() {
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        // ESTA É A LINHA ADICIONADA.
+        // Ela diz ao Supabase para onde o Google deve redirecionar o usuário
+        // após a autorização, para que nossa rota de callback possa finalizar o processo.
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
 
     if (error) {
