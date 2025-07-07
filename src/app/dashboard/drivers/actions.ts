@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
-// Schema para validar se o input é um JSON válido
+// O schema para validar o JSON da conta de serviço continua o mesmo
 const ServiceAccountSchema = z.object({
   type: z.literal('service_account'),
   project_id: z.string(),
@@ -16,19 +16,18 @@ const ServiceAccountSchema = z.object({
 export async function saveGoogleServiceAccount(rawJson: string) {
   const supabase = createClient();
 
-  // Verifica se o usuário está logado
+  // 1. Verifica se o usuário está logado
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { success: false, message: 'Usuário não autenticado.' };
   }
 
   try {
-    // Tenta parsear e validar o JSON
+    // 2. Tenta validar o JSON que o usuário colou
     const credentials = JSON.parse(rawJson);
     ServiceAccountSchema.parse(credentials);
 
-    // Se a validação passar, salva o JSON inteiro como um segredo no Vault
-    // O nome do segredo será único para cada empresa
+    // 3. Pega o ID da empresa do usuário para criar um nome de segredo único
     const { data: profile } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single();
     if (!profile) {
         return { success: false, message: 'Perfil do usuário não encontrado.'}
@@ -36,20 +35,33 @@ export async function saveGoogleServiceAccount(rawJson: string) {
     
     const secretName = `GOOGLE_SERVICE_ACCOUNT_${profile.empresa_id}`;
 
-    // Aqui precisaríamos de uma função admin para criar/atualizar segredos.
-    // Por enquanto, vamos simular o sucesso.
-    console.log(`Simulando salvamento do segredo: ${secretName}`);
+    // ================== A LÓGICA REAL ESTÁ AQUI ==================
+    // 4. Chama a nossa nova Edge Function para salvar o segredo de forma segura
+    const { error: functionError } = await supabase.functions.invoke('save-secret', {
+      body: {
+        secretName: secretName,
+        secretValue: rawJson // Passamos o JSON inteiro como uma string
+      }
+    });
 
-    // A lógica real para salvar o segredo seria mais complexa,
-    // envolvendo uma chamada para a API de gerenciamento do Supabase ou uma Edge Function.
-    // Vamos deixar isso para depois e focar na validação.
+    if (functionError) {
+      // Se a Edge Function retornar um erro, nós o repassamos
+      throw functionError;
+    }
+    // =============================================================
 
     return { success: true, message: 'Credenciais do Google salvas com sucesso!' };
 
   } catch (error) {
+    console.error("Erro ao salvar credenciais:", error);
     if (error instanceof z.ZodError) {
       return { success: false, message: 'O JSON fornecido não é uma chave de conta de serviço válida.' };
     }
-    return { success: false, message: 'O texto fornecido não é um JSON válido.' };
+    if (error instanceof SyntaxError) {
+      return { success: false, message: 'O texto fornecido não é um JSON válido.' };
+    }
+    // Tratamento para erros da Edge Function
+    const message = error instanceof Error ? error.message : 'Falha ao salvar o segredo.';
+    return { success: false, message };
   }
 }
