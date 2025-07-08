@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { saveGoogleServiceAccount } from './actions'; // Importa a nossa nova action
+// A importação de 'actions' foi removida.
 
 export default function DriversPage() {
   const [jsonInput, setJsonInput] = useState('');
@@ -14,18 +14,16 @@ export default function DriversPage() {
     event.preventDefault();
     setIsSaving(true);
 
+    // A lógica para chamar a action de salvar virá no futuro.
+    // Por enquanto, apenas mostramos uma mensagem.
     if (!jsonInput.trim()) {
       toast.error("O campo de credenciais não pode estar vazio.");
-      setIsSaving(false);
-      return;
-    }
-
-    const result = await saveGoogleServiceAccount(jsonInput);
-
-    if (result.success) {
-      toast.success(result.message);
     } else {
-      toast.error(result.message);
+      // Vamos reativar a chamada para a action quando a criarmos novamente.
+      // const result = await saveGoogleServiceAccount(jsonInput);
+      // if (result.success) toast.success(result.message);
+      // else toast.error(result.message);
+      toast.info("Funcionalidade de salvar credenciais em desenvolvimento.");
     }
 
     setIsSaving(false);
@@ -46,7 +44,7 @@ export default function DriversPage() {
           <Label htmlFor="google-credentials">Conteúdo do Arquivo de Chave JSON</Label>
           <textarea
             id="google-credentials"
-            placeholder='Cole o conteúdo do seu arquivo JSON aqui... Ex: { "type": "service_account", ... }'
+            placeholder='Cole o conteúdo do seu arquivo JSON aqui...'
             className="w-full h-40 p-2 border rounded-md font-mono text-sm"
             value={jsonInput}
             onChange={(e) => setJsonInput(e.target.value)}
