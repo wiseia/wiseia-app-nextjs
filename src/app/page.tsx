@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 import LoginForm from '@/components/auth/LoginForm';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
-export default function LoginPage() {
+export default function LoginPage() { // Renomeamos a função para clareza
   const supabase = createClient();
   const router = useRouter();
 
+  // Este listener redireciona para o dashboard após um login bem-sucedido
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
@@ -37,7 +38,9 @@ export default function LoginPage() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-muted-foreground">OU</span>
+            <span className="bg-white px-2 text-muted-foreground">
+              OU
+            </span>
           </div>
         </div>
 
