@@ -13,6 +13,7 @@ export default function DriversPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSaving(true);
+    toast.info("Enviando dados para diagnóstico...");
 
     if (!jsonInput.trim()) {
       toast.error("O campo de credenciais não pode estar vazio.");
@@ -20,14 +21,29 @@ export default function DriversPage() {
       return;
     }
 
-    const result = await saveGoogleServiceAccount(jsonInput);
+    // ===========================================
+    // MUDANÇA PARA DEPURAÇÃO
+    // ===========================================
+    try {
+      // A chamada para a action continua a mesma
+      const result = await saveGoogleServiceAccount(jsonInput);
 
-    if (result && result.success) {
-      toast.success(result.message);
-      setJsonInput(''); 
-    } else {
-      toast.error(result?.message || "Ocorreu uma falha no servidor.");
+      // A função de diagnóstico sempre deve retornar success: true.
+      // A mensagem conterá os dados de debug.
+      if (result && result.success && result.message) {
+        // Mostramos os dados de diagnóstico em um alerta para facilitar a cópia
+        alert("DIAGNÓSTICO DA FUNÇÃO:\n\n" + result.message);
+        toast.success("Diagnóstico recebido. Verifique o alerta.");
+      } else {
+        // Se a action falhar, mostramos o erro dela.
+        toast.error(result?.message || "A ação do servidor falhou em retornar um resultado.");
+      }
+    } catch (e) {
+      // Se houver um erro na própria chamada, mostramos aqui.
+      toast.error("Erro ao chamar a funcionalidade do servidor.");
+      console.error(e);
     }
+    // ===========================================
 
     setIsSaving(false);
   };
@@ -56,7 +72,7 @@ export default function DriversPage() {
         </div>
 
         <Button type="submit" disabled={isSaving}>
-          {isSaving ? 'Salvando...' : 'Salvar Credenciais do Google'}
+          {isSaving ? 'Executando Diagnóstico...' : 'Salvar e Diagnosticar'}
         </Button>
       </form>
     </div>
