@@ -32,10 +32,12 @@ export const columns: ColumnDef<Departamento>[] = [
   {
     accessorKey: "created_at",
     header: "Criado em",
-    cell: ({ row }) => {
-        const date = new Date(row.getValue("created_at"))
-        return <span>{date.toLocaleDateString('pt-BR')}</span>
-    }
+cell: ({ row }) => {
+    const dateString = row.getValue("created_at");
+    if (!dateString) return "N/A";
+    const date = new Date(dateString as string);
+    return <span>{date.toLocaleDateString('pt-BR')}</span>;
+}
   },
   {
     id: "actions",

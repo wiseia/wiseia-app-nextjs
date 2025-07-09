@@ -8,7 +8,7 @@ import { z } from 'zod';
 const FormSchema = z.object({
   id: z.string().optional(), // ID é opcional (só existe na edição)
   nome: z.string().min(3, { message: 'O nome deve ter no mínimo 3 caracteres.' }),
-  descricao: z.string().optional(),
+descricao: z.string().optional().nullable(),
 });
 
 // ===============================================
