@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-// A importação de 'actions' foi removida.
+import { saveGoogleServiceAccount } from '@/app/dashboard/drivers/actions';
 
 export default function DriversPage() {
   const [jsonInput, setJsonInput] = useState('');
@@ -14,17 +14,28 @@ export default function DriversPage() {
     event.preventDefault();
     setIsSaving(true);
 
-    // A lógica para chamar a action de salvar virá no futuro.
-    // Por enquanto, apenas mostramos uma mensagem.
     if (!jsonInput.trim()) {
       toast.error("O campo de credenciais não pode estar vazio.");
-    } else {
-      // Vamos reativar a chamada para a action quando a criarmos novamente.
-      // const result = await saveGoogleServiceAccount(jsonInput);
-      // if (result.success) toast.success(result.message);
-      // else toast.error(result.message);
-      toast.info("Funcionalidade de salvar credenciais em desenvolvimento.");
+      setIsSaving(false);
+      return;
     }
+
+    const result = await saveGoogleServiceAccount(jsonInput);
+
+    // ================== A CORREÇÃO ESTÁ AQUI ==================
+    // Adicionamos a verificação para garantir que 'result' não é nulo/undefined
+    if (result) { 
+      if (result.success) {
+        toast.success(result.message);
+        setJsonInput(''); 
+      } else {
+        toast.error(result.message);
+      }
+    } else {
+      // Se a action não retornar nada, mostramos um erro genérico
+      toast.error("Ocorreu uma falha de comunicação com o servidor.");
+    }
+    // ==========================================================
 
     setIsSaving(false);
   };
