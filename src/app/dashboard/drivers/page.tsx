@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { saveGoogleServiceAccount } from '@/app/dashboard/drivers/actions';
+import { saveGoogleServiceAccount } from './actions';
 
 export default function DriversPage() {
   const [jsonInput, setJsonInput] = useState('');
@@ -22,20 +22,12 @@ export default function DriversPage() {
 
     const result = await saveGoogleServiceAccount(jsonInput);
 
-    // ================== A CORREÇÃO ESTÁ AQUI ==================
-    // Adicionamos a verificação para garantir que 'result' não é nulo/undefined
-    if (result) { 
-      if (result.success) {
-        toast.success(result.message);
-        setJsonInput(''); 
-      } else {
-        toast.error(result.message);
-      }
+    if (result && result.success) {
+      toast.success(result.message);
+      setJsonInput(''); 
     } else {
-      // Se a action não retornar nada, mostramos um erro genérico
-      toast.error("Ocorreu uma falha de comunicação com o servidor.");
+      toast.error(result?.message || "Ocorreu uma falha no servidor.");
     }
-    // ==========================================================
 
     setIsSaving(false);
   };
