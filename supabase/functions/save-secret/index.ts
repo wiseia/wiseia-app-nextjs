@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -9,37 +11,35 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Tenta ler o corpo da requisição
-    const body = await req.json();
+    const { secretName, secretValue } = await req.json();
+    if (!secretName || !secretValue) {
+      throw new Error("Nome ou valor do segredo não fornecido.");
+    }
 
-    // Pega as variáveis de ambiente
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const openAiKey = Deno.env.get('OPENAI_API_KEY');
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+    
+    const { error } = await supabaseAdmin.rpc('upsert_secret', {
+      p_name: secretName,
+      p_secret: secretValue
+    });
+    
+    if (error) {
+      throw error;
+    }
 
-    // Monta um objeto de resposta com tudo que a função consegue ver
-    const diagnostics = {
-      message: "Dados de diagnóstico da função 'save-secret'",
-      receivedBody: body,
-      env: {
-        SUPABASE_URL_EXISTS: !!supabaseUrl,
-        SERVICE_ROLE_KEY_EXISTS: !!serviceRoleKey,
-        OPENAI_API_KEY_EXISTS: !!openAiKey,
-        SERVICE_ROLE_KEY_FIRST_CHARS: serviceRoleKey?.substring(0, 5) || null,
-      }
-    };
-
-    // Retorna SEMPRE um status 200 com os dados de diagnóstico
-    return new Response(JSON.stringify(diagnostics), {
+    return new Response(JSON.stringify({ success: true, message: "Segredo salvo com sucesso!" }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
   } catch (error) {
-    // Se até mesmo o req.json() falhar, ele cairá aqui
     const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro inesperado.";
-    return new Response(JSON.stringify({ error: `Falha ao processar a requisição: ${errorMessage}` }), {
-      status: 400,
+    console.error("Erro na função save-secret:", error);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
